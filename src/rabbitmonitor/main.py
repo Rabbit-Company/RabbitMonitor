@@ -39,8 +39,12 @@ async def stats():
 @app.websocket('/ws')
 async def ws():
   while True:
-    data = await websocket.receive()
-    await websocket.send(f"echo {data}")
+    msg = await websocket.receive()
+    endpoints = ['cpu', 'memory', 'swap', 'storage']
+    if msg in endpoints:
+      await websocket.send(f"{data.get(msg)}")
+    else:
+      await websocket.send(f"{data}")
 
 def getInfo():
   data = platform.freedesktop_os_release()
@@ -65,7 +69,7 @@ def getInfo():
 def startDataFetcher():
   while True:
     fetchData()
-    sleep(5)
+    sleep(refresh)
 
 def fetchData():
   global data
@@ -109,6 +113,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument("--host", help="bind the server to specific host (default: 0.0.0.0)", type=str, default='0.0.0.0')
   parser.add_argument("--port", help="bind the server to specific port (default: 8088)", type=int, default=8088)
+  parser.add_argument("--refresh", help="data will be fetched every x seconds (default: 5)", type=int, default=5)
   parser.add_argument("--username", help="protect api endpoints with an username (default: rabbit)", type=str, default='rabbit')
   parser.add_argument("--password", help="protect api endpoints with a password (default: none)", type=str, default='')
   parser.add_argument("--debug", help="enable debug mode (default: False)", action='store_true', default=False)
@@ -116,6 +121,7 @@ if __name__ == '__main__':
 
   user = args.username
   passwd = args.password
+  refresh = args.refresh
 
   getInfo()
   Thread(target=startDataFetcher).start()
