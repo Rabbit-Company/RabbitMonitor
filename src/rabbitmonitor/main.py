@@ -54,7 +54,7 @@ async def ws():
       await websocket.send(f"{data}")
 
 def getInfo():
-  data = platform.freedesktop_os_release()
+  info = platform.freedesktop_os_release()
   global serverInfo
   serverInfo = {
     'name': platform.node(),
@@ -64,12 +64,12 @@ def getInfo():
       'threads': psutil.cpu_count(1),
     },
     'system': {
-      'name': data['NAME'],
-      'id': data['ID'],
-      'pretty_name': data['PRETTY_NAME'],
-      'version': data['VERSION'],
-      'version_id': data['VERSION_ID'],
-      'logo': data['LOGO']
+      'name': info['NAME'],
+      'id': info['ID'],
+      'pretty_name': info['PRETTY_NAME'],
+      'version': info['VERSION'],
+      'version_id': info['VERSION_ID'],
+      'logo': info['LOGO']
     }
   }
 
@@ -83,6 +83,12 @@ def fetchData():
   memory = psutil.virtual_memory()
   swap = psutil.swap_memory()
   storage = psutil.disk_usage('/')
+
+  addresses = formatAddresses(psutil.net_if_addrs())
+  connections = formatConnections(psutil.net_connections())
+  counters = formatCounters(psutil.net_io_counters(1,1))
+  status = formatStatus(psutil.net_if_stats())
+
   data = {
     'cpu': {
       'load': psutil.getloadavg(),
@@ -114,10 +120,10 @@ def fetchData():
       'percent': storage[3]
     },
     'network': {
-      'addresses': psutil.net_if_addrs(),
-      'stats': psutil.net_if_stats(),
-      'speed': psutil.net_io_counters(),
-      'connections': psutil.net_connections()
+      'addresses': addresses,
+      'status': status,
+      'counters': counters,
+      'connections': connections
     },
     'sensors': {
       'temperatures': psutil.sensors_temperatures(),
@@ -125,6 +131,75 @@ def fetchData():
       'battery': psutil.sensors_battery()
     }
   }
+
+def formatAddresses(addresses):
+  new = {}
+  for key in addresses:
+    new[key] = {}
+    for i in range(len(addresses[key])):
+      new[key][i] = {
+        'family': addresses[key][i][0],
+        'address': addresses[key][i][1],
+        'netmask': addresses[key][i][2],
+        'broadcast': addresses[key][i][3],
+        'ptp': addresses[key][i][4]
+      }
+  return new
+
+def formatConnections(connections):
+  new = {}
+  for i in range(len(connections)):
+    lip = lpo = rip = rpo = None
+    if len(connections[i][3]) > 0:
+      lip = connections[i][3][0]
+    if len(connections[i][3]) > 1:
+      lpo = connections[i][3][1]
+    if len(connections[i][4]) > 0:
+      rip = connections[i][4][0]
+    if len(connections[i][4]) > 1:
+      rpo = connections[i][4][1]
+    new[i] = {
+      'fd': connections[i][0],
+      'family': connections[i][1],
+      'type': connections[i][2],
+      'local_address': {
+        'ip': lip,
+        'port': lpo
+      },
+      'remote_address': {
+        'ip': rip,
+        'port': rpo
+      },
+      'status': connections[i][5],
+      'pid': connections[i][6]
+    }
+  return new
+
+def formatCounters(speeds):
+  new = {}
+  for key in speeds:
+    new[key] = {
+      'bytes_sent': speeds[key][0],
+      'bytes_received': speeds[key][1],
+      'packets_sent': speeds[key][2],
+      'packets_received': speeds[key][3],
+      'error_in': speeds[key][4],
+      'error_out': speeds[key][5],
+      'drop_in': speeds[key][6],
+      'drop_out': speeds[key][7]
+    }
+  return new
+
+def formatStatus(status):
+  new = {}
+  for key in status:
+    new[key] = {
+      'is_up': status[key][0],
+      'duplex': status[key][1],
+      'speed': status[key][2],
+      'mtu': status[key][3]
+    }
+  return new
 
 if __name__ == '__main__':
 
