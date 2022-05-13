@@ -92,7 +92,9 @@ def fetchData():
 
   temperatures = formatTemperatures(psutil.sensors_temperatures())
   fans = formatFans(psutil.sensors_fans())
-  battery = formatBattery(psutil.sensors_battery())   
+  battery = formatBattery(psutil.sensors_battery())
+
+  users = formatUsers(psutil.users())
 
   data['cpu']['load'] = load
   data['cpu']['frequency'] = frequency
@@ -128,11 +130,14 @@ def fetchData():
   data['sensors']['fans'] = fans
   data['sensors']['battery'] = battery
 
+  data['system']['users'] = users
+
 def slowFetchData():
   global data
   info = platform.freedesktop_os_release()
 
   data['name'] = platform.node()
+  data['system']['boot_time'] = psutil.boot_time()
   data['cpu']['name'] = get_cpu_info()['brand_raw']
   data['cpu']['cores'] = psutil.cpu_count(0)
   data['cpu']['threads'] = psutil.cpu_count(1)
@@ -289,6 +294,18 @@ def formatBattery(battery):
       'seconds_left': battery[1],
       'power_plugged': battery[2]
     }
+  return new
+
+def formatUsers(users):
+  new = []
+  for i in range(len(users)):
+    new.append({
+      'name': users[i][0],
+      'terminal': users[i][1],
+      'host': users[i][2],
+      'started': users[i][3],
+      'pid': users[i][4]
+    })
   return new
 
 def calculateSpeed(old, new, time):
