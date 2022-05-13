@@ -28,6 +28,14 @@ async def swap():
 async def storage():
   return data.get('storage')
 
+@app.route("/network")
+async def network():
+  return data.get('network')
+
+@app.route("/sensors")
+async def sensors():
+  return data.get('sensors')
+
 @app.route("/info")
 async def info():
   return serverInfo
@@ -40,7 +48,7 @@ async def stats():
 async def ws():
   while True:
     msg = await websocket.receive()
-    endpoints = ['cpu', 'memory', 'swap', 'storage']
+    endpoints = ['cpu', 'memory', 'swap', 'storage', 'network', 'sensors']
     if msg in endpoints:
       await websocket.send(f"{data.get(msg)}")
     else:
@@ -105,6 +113,17 @@ def fetchData():
       'used': storage[1],
       'free': storage[2],
       'percent': storage[3]
+    },
+    'network': {
+      'addresses': psutil.net_if_addrs(),
+      'stats': psutil.net_if_stats(),
+      'speed': psutil.net_io_counters(),
+      'connections': psutil.net_connections()
+    },
+    'sensors': {
+      'temperatures': psutil.sensors_temperatures(),
+      'fans': psutil.sensors_fans(),
+      'battery': psutil.sensors_battery()
     }
   }
 
