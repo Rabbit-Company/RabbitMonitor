@@ -89,6 +89,9 @@ def fetchData():
   counters = formatCounters(psutil.net_io_counters(1,1))
   status = formatStatus(psutil.net_if_stats())
 
+  fans = formatFans(psutil.sensors_fans())
+  battery = formatBattery(psutil.sensors_battery())
+
   data = {
     'cpu': {
       'load': psutil.getloadavg(),
@@ -127,8 +130,8 @@ def fetchData():
     },
     'sensors': {
       'temperatures': psutil.sensors_temperatures(),
-      'fans': psutil.sensors_fans(),
-      'battery': psutil.sensors_battery()
+      'fans': fans,
+      'battery': battery
     }
   }
 
@@ -198,6 +201,27 @@ def formatStatus(status):
       'duplex': status[key][1],
       'speed': status[key][2],
       'mtu': status[key][3]
+    }
+  return new
+
+def formatFans(fans):
+  new = {}
+  for key in fans:
+    new[key] = {}
+    for i in range(len(fans[key])):
+      new[key] = {
+        'label': fans[key][i][0],
+        'rpm': fans[key][i][1]
+      }
+  return new
+
+def formatBattery(battery):
+  new = None
+  if battery is not None:
+    new = {
+      'percent': battery[0],
+      'seconds_left': battery[1],
+      'power_plugged': battery[2]
     }
   return new
 
