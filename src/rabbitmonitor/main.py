@@ -89,15 +89,19 @@ def fetchData():
   counters = formatCounters(psutil.net_io_counters(1,1))
   status = formatStatus(psutil.net_if_stats())
 
+  load = formatLoad(psutil.getloadavg())
+  frequency = formatFrequency(psutil.cpu_freq(0))
+  frequencies = formatFrequencies(psutil.cpu_freq(1))
+
   temperatures = formatTemperatures(psutil.sensors_temperatures())
   fans = formatFans(psutil.sensors_fans())
   battery = formatBattery(psutil.sensors_battery())
 
   data = {
     'cpu': {
-      'load': psutil.getloadavg(),
-      'frequency': psutil.cpu_freq(0),
-      'frequencies': psutil.cpu_freq(1)
+      'load': load,
+      'frequency': frequency,
+      'frequencies': frequencies
     },
     'memory': {
       'total': memory[0],
@@ -135,6 +139,30 @@ def fetchData():
       'battery': battery
     }
   }
+
+def formatLoad(load):
+  return {
+    '1min': load[0],
+    '5min': load[1],
+    '15min': load[2]
+  }
+
+def formatFrequency(frequency):
+  return{
+    'current': frequency[0],
+    'min': frequency[1],
+    'max': frequency[2]
+  }
+
+def formatFrequencies(frequencies):
+  new = {}
+  for i in range(len(frequencies)):
+    new[i] = {
+      'current': frequencies[i][0],
+      'min': frequencies[i][1],
+      'max': frequencies[i][2]
+    }
+  return new
 
 def formatAddresses(addresses):
   new = {}
