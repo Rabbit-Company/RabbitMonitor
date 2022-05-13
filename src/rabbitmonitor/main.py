@@ -89,6 +89,7 @@ def fetchData():
   counters = formatCounters(psutil.net_io_counters(1,1))
   status = formatStatus(psutil.net_if_stats())
 
+  temperatures = formatTemperatures(psutil.sensors_temperatures())
   fans = formatFans(psutil.sensors_fans())
   battery = formatBattery(psutil.sensors_battery())
 
@@ -129,7 +130,7 @@ def fetchData():
       'connections': connections
     },
     'sensors': {
-      'temperatures': psutil.sensors_temperatures(),
+      'temperatures': temperatures,
       'fans': fans,
       'battery': battery
     }
@@ -202,6 +203,19 @@ def formatStatus(status):
       'speed': status[key][2],
       'mtu': status[key][3]
     }
+  return new
+
+def formatTemperatures(temperatures):
+  new = {}
+  for key in temperatures:
+    new[key] = {}
+    for i in range(len(temperatures[key])):
+      new[key][i] = {
+        'label': temperatures[key][i][0],
+        'current': temperatures[key][i][1],
+        'high': temperatures[key][i][2],
+        'critical': temperatures[key][i][3],
+      }
   return new
 
 def formatFans(fans):
