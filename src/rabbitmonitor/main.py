@@ -3,7 +3,6 @@ from cpuinfo import get_cpu_info
 import psutil
 import platform
 import argparse
-import asyncio
 from threading import Thread
 from time import sleep
 
