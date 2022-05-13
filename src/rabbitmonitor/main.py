@@ -57,7 +57,7 @@ async def stats():
 async def ws():
   while True:
     msg = await websocket.receive()
-    endpoints = ['cpu', 'memory', 'swap', 'storage', 'network', 'sensors']
+    endpoints = ['cpu', 'memory', 'swap', 'storage', 'network', 'sensors', 'system']
     if msg in endpoints:
       await websocket.send(f"{data.get(msg)}")
     else:
