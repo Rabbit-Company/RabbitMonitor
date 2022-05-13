@@ -8,6 +8,16 @@ from time import sleep
 
 app = Quart(__name__)
 
+data = {
+  'cpu': {},
+  'memory': {},
+  'swap': {},
+  'storage': {},
+  'network': {},
+  'sensors': {},
+  'system': {}
+}
+
 user = 'rabbit'
 passwd = ''
 
@@ -35,9 +45,9 @@ async def network():
 async def sensors():
   return data.get('sensors')
 
-@app.route("/info")
-async def info():
-  return serverInfo
+@app.route("/system")
+async def system():
+  return data.get('system')
 
 @app.route("/stats")
 async def stats():
@@ -53,30 +63,15 @@ async def ws():
     else:
       await websocket.send(f"{data}")
 
-def getInfo():
-  info = platform.freedesktop_os_release()
-  global serverInfo
-  serverInfo = {
-    'name': platform.node(),
-    'cpu': {
-      'name': get_cpu_info()['brand_raw'],
-      'cores': psutil.cpu_count(0),
-      'threads': psutil.cpu_count(1),
-    },
-    'system': {
-      'name': info['NAME'],
-      'id': info['ID'],
-      'pretty_name': info['PRETTY_NAME'],
-      'version': info['VERSION'],
-      'version_id': info['VERSION_ID'],
-      'logo': info['LOGO']
-    }
-  }
-
 def startDataFetcher():
   while True:
     fetchData()
     sleep(refresh)
+
+def startSlowDataFetcher():
+  while True:
+    slowFetchData()
+    sleep(60)
 
 def fetchData():
   global data
@@ -97,48 +92,54 @@ def fetchData():
   fans = formatFans(psutil.sensors_fans())
   battery = formatBattery(psutil.sensors_battery())
 
-  data = {
-    'cpu': {
-      'load': load,
-      'frequency': frequency,
-      'frequencies': frequencies
-    },
-    'memory': {
-      'total': memory[0],
-      'available': memory[1],
-      'percent': memory[2],
-      'used': memory[3],
-      'free': memory[4],
-      'active': memory[5],
-      'inactive': memory[6],
-      'buffers': memory[7],
-      'cached': memory[8],
-      'shared': memory[9]
-    },
-    'swap': {
-      'total': swap[0],
-      'used': swap[1],
-      'free': swap[2],
-      'percent': swap[3]
-    },
-    'storage': {
-      'total': storage[0],
-      'used': storage[1],
-      'free': storage[2],
-      'percent': storage[3]
-    },
-    'network': {
-      'addresses': addresses,
-      'status': status,
-      'counters': counters,
-      'connections': connections
-    },
-    'sensors': {
-      'temperatures': temperatures,
-      'fans': fans,
-      'battery': battery
-    }
-  }
+  data['cpu']['load'] = load
+  data['cpu']['frequency'] = frequency
+  data['cpu']['frequencies'] = frequencies
+
+  data['memory']['total'] = memory[0]
+  data['memory']['available'] = memory[1]
+  data['memory']['percent'] = memory[2]
+  data['memory']['used'] = memory[3]
+  data['memory']['free'] = memory[4]
+  data['memory']['active'] = memory[5]
+  data['memory']['inactive'] = memory[6]
+  data['memory']['buffers'] = memory[7]
+  data['memory']['cached'] = memory[8]
+  data['memory']['shared'] = memory[9]
+
+  data['swap']['total'] = swap[0]
+  data['swap']['used'] = swap[1]
+  data['swap']['free'] = swap[2]
+  data['swap']['percent'] = swap[3]
+
+  data['storage']['total'] = storage[0]
+  data['storage']['used'] = storage[1]
+  data['storage']['free'] = storage[2]
+  data['storage']['percent'] = storage[3]
+
+  data['network']['addresses'] = addresses
+  data['network']['status'] = status
+  data['network']['counters'] = counters
+  data['network']['connections'] = connections
+
+  data['sensors']['temperatures'] = temperatures
+  data['sensors']['fans'] = fans
+  data['sensors']['battery'] = battery
+
+def slowFetchData():
+  global data
+  info = platform.freedesktop_os_release()
+
+  data['name'] = platform.node()
+  data['cpu']['name'] = get_cpu_info()['brand_raw']
+  data['cpu']['cores'] = psutil.cpu_count(0)
+  data['cpu']['threads'] = psutil.cpu_count(1)
+  data['system']['name'] = info['NAME']
+  data['system']['id'] = info['ID']
+  data['system']['pretty_name'] = info['PRETTY_NAME']
+  data['system']['version'] = info['VERSION']
+  data['system']['version_id'] = info['VERSION_ID']
+  data['system']['logo'] = info['LOGO']
 
 def formatLoad(load):
   return {
@@ -155,31 +156,31 @@ def formatFrequency(frequency):
   }
 
 def formatFrequencies(frequencies):
-  new = {}
+  new = []
   for i in range(len(frequencies)):
-    new[i] = {
+    new.append({
       'current': frequencies[i][0],
       'min': frequencies[i][1],
       'max': frequencies[i][2]
-    }
+    })
   return new
 
 def formatAddresses(addresses):
   new = {}
   for key in addresses:
-    new[key] = {}
+    new[key] = []
     for i in range(len(addresses[key])):
-      new[key][i] = {
+      new[key].append({
         'family': addresses[key][i][0],
         'address': addresses[key][i][1],
         'netmask': addresses[key][i][2],
         'broadcast': addresses[key][i][3],
         'ptp': addresses[key][i][4]
-      }
+      })
   return new
 
 def formatConnections(connections):
-  new = {}
+  new = []
   for i in range(len(connections)):
     lip = lpo = rip = rpo = None
     if len(connections[i][3]) > 0:
@@ -190,7 +191,7 @@ def formatConnections(connections):
       rip = connections[i][4][0]
     if len(connections[i][4]) > 1:
       rpo = connections[i][4][1]
-    new[i] = {
+    new.append({
       'fd': connections[i][0],
       'family': connections[i][1],
       'type': connections[i][2],
@@ -204,7 +205,7 @@ def formatConnections(connections):
       },
       'status': connections[i][5],
       'pid': connections[i][6]
-    }
+    })
   return new
 
 def formatCounters(speeds):
@@ -236,14 +237,14 @@ def formatStatus(status):
 def formatTemperatures(temperatures):
   new = {}
   for key in temperatures:
-    new[key] = {}
+    new[key] = []
     for i in range(len(temperatures[key])):
-      new[key][i] = {
+      new[key].append({
         'label': temperatures[key][i][0],
         'current': temperatures[key][i][1],
         'high': temperatures[key][i][2],
         'critical': temperatures[key][i][3],
-      }
+      })
   return new
 
 def formatFans(fans):
@@ -282,7 +283,7 @@ if __name__ == '__main__':
   passwd = args.password
   refresh = args.refresh
 
-  getInfo()
   Thread(target=startDataFetcher).start()
+  Thread(target=startSlowDataFetcher).start()
 
   app.run(args.host, args.port, args.debug)
