@@ -18,6 +18,8 @@ data = {
   'system': {}
 }
 
+networkSpeeds = {}
+
 user = 'rabbit'
 passwd = ''
 
@@ -90,7 +92,7 @@ def fetchData():
 
   temperatures = formatTemperatures(psutil.sensors_temperatures())
   fans = formatFans(psutil.sensors_fans())
-  battery = formatBattery(psutil.sensors_battery())
+  battery = formatBattery(psutil.sensors_battery())   
 
   data['cpu']['load'] = load
   data['cpu']['frequency'] = frequency
@@ -208,29 +210,50 @@ def formatConnections(connections):
     })
   return new
 
-def formatCounters(speeds):
+def formatCounters(counters):
+  global data
+  global networkSpeeds
   new = {}
-  for key in speeds:
+  for key in counters:
+    try:
+      upload = data['network']['counters'][key]['bytes_sent']
+      download = data['network']['counters'][key]['bytes_received']
+
+      networkSpeeds[key] = {}
+      networkSpeeds[key]['upload'] = calculateSpeed(upload, counters[key][0], refresh)
+      networkSpeeds[key]['download'] = calculateSpeed(download, counters[key][1], refresh)
+    except KeyError:
+      pass
     new[key] = {
-      'bytes_sent': speeds[key][0],
-      'bytes_received': speeds[key][1],
-      'packets_sent': speeds[key][2],
-      'packets_received': speeds[key][3],
-      'error_in': speeds[key][4],
-      'error_out': speeds[key][5],
-      'drop_in': speeds[key][6],
-      'drop_out': speeds[key][7]
+      'bytes_sent': counters[key][0],
+      'bytes_received': counters[key][1],
+      'packets_sent': counters[key][2],
+      'packets_received': counters[key][3],
+      'error_in': counters[key][4],
+      'error_out': counters[key][5],
+      'drop_in': counters[key][6],
+      'drop_out': counters[key][7]
     }
   return new
 
 def formatStatus(status):
+  global networkSpeeds
+  download = 0
+  upload = 0
   new = {}
   for key in status:
+    try:
+      download = networkSpeeds[key]['download']
+      upload = networkSpeeds[key]['upload']
+    except KeyError:
+      pass
     new[key] = {
       'is_up': status[key][0],
       'duplex': status[key][1],
       'speed': status[key][2],
-      'mtu': status[key][3]
+      'mtu': status[key][3],
+      'download': download,
+      'upload': upload
     }
   return new
 
@@ -268,12 +291,15 @@ def formatBattery(battery):
     }
   return new
 
+def calculateSpeed(old, new, time):
+  return ((new - old) / time) * 8
+
 if __name__ == '__main__':
 
   parser = argparse.ArgumentParser()
   parser.add_argument("--host", help="bind the server to specific host (default: 0.0.0.0)", type=str, default='0.0.0.0')
   parser.add_argument("--port", help="bind the server to specific port (default: 8088)", type=int, default=8088)
-  parser.add_argument("--refresh", help="data will be fetched every x seconds (default: 5)", type=int, default=5)
+  parser.add_argument("--refresh", help="data will be fetched every x seconds (default: 1)", type=int, default=1)
   parser.add_argument("--username", help="protect api endpoints with an username (default: rabbit)", type=str, default='rabbit')
   parser.add_argument("--password", help="protect api endpoints with a password (default: none)", type=str, default='')
   parser.add_argument("--debug", help="enable debug mode (default: False)", action='store_true', default=False)
