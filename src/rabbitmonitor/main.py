@@ -318,6 +318,10 @@ def calculateSpeed(old, new, time):
 def createMetrics():
   global openMetrics
   metrics = ""
+  # CPU
+  metrics += createMetric('gauge', 'cpu_load_1min', 'CPU load recorded in last minute', data['cpu']['load']['1min'])
+  metrics += createMetric('gauge', 'cpu_load_5min', 'CPU load recorded in last 5 minutes', data['cpu']['load']['5min'])
+  metrics += createMetric('gauge', 'cpu_load_15min', 'CPU load recorded in last 15 minutes', data['cpu']['load']['15min'])
   # Memory
   metrics += createMetric('gauge', 'memory_total', 'Total memory in bytes', data['memory']['total'])
   metrics += createMetric('gauge', 'memory_available', 'Available memory in bytes', data['memory']['available'])
