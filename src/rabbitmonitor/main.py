@@ -153,10 +153,16 @@ def slowFetchData():
   data['system']['logo'] = info['LOGO']
 
 def formatLoad(load):
+  percent = 0
+  try:
+    percent = (load[0]/data['cpu']['threads'])*100
+  except KeyError:
+    pass
   return {
     '1min': load[0],
     '5min': load[1],
-    '15min': load[2]
+    '15min': load[2],
+    'percent': percent
   }
 
 def formatFrequency(frequency):
@@ -322,6 +328,7 @@ def createMetrics():
   metrics += createMetric('gauge', 'cpu_load_1min', 'CPU load recorded in last minute', data['cpu']['load']['1min'])
   metrics += createMetric('gauge', 'cpu_load_5min', 'CPU load recorded in last 5 minutes', data['cpu']['load']['5min'])
   metrics += createMetric('gauge', 'cpu_load_15min', 'CPU load recorded in last 15 minutes', data['cpu']['load']['15min'])
+  metrics += createMetric('gauge', 'cpu_load_percent', 'CPU load in percent', data['cpu']['load']['percent'])
   # Memory
   metrics += createMetric('gauge', 'memory_total', 'Total memory in bytes', data['memory']['total'])
   metrics += createMetric('gauge', 'memory_available', 'Available memory in bytes', data['memory']['available'])
