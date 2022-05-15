@@ -32,6 +32,8 @@ python3 -m rabbitmonitor
 # Daemonizing (using systemd)
 Running Rabbit Monitor in the background is a simple task, just make sure that it runs without errors before doing this. Place the contents below in a file called ```rabbitmonitor.service``` in the ```/etc/systemd/system``` directory.
 
+WARNING: Make sure to change the User to the one that have installed pip packages.
+
 ```service
 [Unit]
 Description=Rabbit Monitor 
@@ -39,8 +41,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=root #Enter your user from which you have installed pip packages
-ExecStart=python3 -m rabbitmonitor
+User=root
+ExecStart=python3 -m rabbitmonitor --onlymetrics
 TimeoutStartSec=0
 RemainAfterExit=yes
 
