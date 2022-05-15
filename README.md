@@ -30,5 +30,20 @@ python -m rabbitmonitor
 ```
 
 # Daemonizing (using systemd)
+Running Rabbit Monitor in the background is a simple task, just make sure that it runs without errors before doing this. Place the contents below in a file called ```rabbitmonitor.service``` in the ```/etc/systemd/system``` directory.
+
+```service
+[Unit]
+Description = Starting Rabbit Monitor
+After = network.target
+
+[Service]
+ExecStart = python -m rabbitmonitor
+
+[Install]
+WantedBy = multi-user.target
+```
+Then, run the commands below to reload systemd and start Rabbit Monitor.
 ```yml
-nano /etc/systemd/system/rabbitmonitor.service
+systemctl enable --now rabbitmonitor
+```
