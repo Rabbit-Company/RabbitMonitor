@@ -24,34 +24,50 @@ openMetrics = ""
 
 @app.route("/cpu")
 async def cpu():
+  if onlymetrics:
+    return {}
   return data.get('cpu')
 
 @app.route("/memory")
 async def memory():
+  if onlymetrics:
+    return {}
   return data.get('memory')
 
 @app.route("/swap")
 async def swap():
+  if onlymetrics:
+    return {}
   return data.get('swap')
 
 @app.route("/storage")
 async def storage():
+  if onlymetrics:
+    return {}
   return data.get('storage')
 
 @app.route("/network")
 async def network():
+  if onlymetrics:
+    return {}
   return data.get('network')
 
 @app.route("/sensors")
 async def sensors():
+  if onlymetrics:
+    return {}
   return data.get('sensors')
 
 @app.route("/system")
 async def system():
+  if onlymetrics:
+    return {}
   return data.get('system')
 
 @app.route("/stats")
 async def stats():
+  if onlymetrics:
+    return {}
   return data
 
 @app.route("/metrics")
@@ -63,7 +79,9 @@ async def ws():
   while True:
     msg = await websocket.receive()
     endpoints = ['cpu', 'memory', 'swap', 'storage', 'network', 'sensors', 'system']
-    if msg in endpoints:
+    if onlymetrics:
+      await websocket.send("{}")
+    elif msg in endpoints:
       await websocket.send(f"{data.get(msg)}")
     else:
       await websocket.send(f"{data}")
@@ -368,11 +386,15 @@ def start():
   parser.add_argument("--host", help="bind the server to specific host (default: 0.0.0.0)", type=str, default='0.0.0.0')
   parser.add_argument("--port", help="bind the server to specific port (default: 8088)", type=int, default=8088)
   parser.add_argument("--refresh", help="data will be fetched every x seconds (default: 5)", type=int, default=5)
+  parser.add_argument("--onlymetrics", help="disable all other API endpoints except metrics (default: False)", action='store_true', default=False)
   parser.add_argument("--debug", help="enable debug mode (default: False)", action='store_true', default=False)
   args = parser.parse_args()
 
   global refresh
   refresh = args.refresh
+
+  global onlymetrics
+  onlymetrics = args.onlymetrics
 
   Thread(target=startDataFetcher).start()
   Thread(target=startSlowDataFetcher).start()
