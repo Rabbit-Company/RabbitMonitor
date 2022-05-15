@@ -18,3 +18,13 @@ API Endpoints:
 - /system
 - /stats
 - /metrics (Support Prometheus)
+
+# Installaion (Python and PIP required)
+```yml
+# Install Python modules
+pip install argparse psutil py-cpuinfo quart
+# Install Rabbit Monitor
+pip install rabbitmonitor
+# Start monitoring with
+python -m rabbitmonitor
+```
