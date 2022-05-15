@@ -374,8 +374,9 @@ def createMetrics():
   metrics += createMetric('gauge', 'storage_percent', 'Used storage in percent', data['storage']['percent'])
   # Network
   for key in data['network']['status']:
-    metrics += createMetric('gauge', 'network_'+key+'_download', 'Download speed on ' + key + ' network interface in bits', data['network']['status'][key]['download'])
-    metrics += createMetric('gauge', 'network_'+key+'_upload', 'Upload speed on ' + key + ' network interface in bits', data['network']['status'][key]['upload'])
+    bkey = key.replace('-', '')
+    metrics += createMetric('gauge', 'network_'+bkey+'_download', 'Download speed on ' + bkey + ' network interface in bits', data['network']['status'][key]['download'])
+    metrics += createMetric('gauge', 'network_'+bkey+'_upload', 'Upload speed on ' + bkey + ' network interface in bits', data['network']['status'][key]['upload'])
   openMetrics = metrics
 
 def createMetric(type, name, description, value):
