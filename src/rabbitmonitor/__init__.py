@@ -69,10 +69,10 @@ async def ws():
       await websocket.send(f"{data}")
 
 def startDataFetcher():
-	global refresh
-	while True:
-		fetchData()
-		sleep(refresh)
+  global refresh
+  while True:
+    fetchData()
+    sleep(refresh)
 
 def startSlowDataFetcher():
   while True:
@@ -139,22 +139,22 @@ def fetchData():
   createMetrics()
 
 def slowFetchData():
-	global data
-	try:
-		info = platform.freedesktop_os_release()
-		data['system']['name'] = info['NAME']
-		data['system']['id'] = info['ID']
-		data['system']['pretty_name'] = info['PRETTY_NAME']
-		data['system']['version'] = info['VERSION']
-		data['system']['version_id'] = info['VERSION_ID']
-		data['system']['logo'] = info['LOGO']
-	except AttributeError:
-		pass
-	data['name'] = platform.node()
-	data['system']['boot_time'] = psutil.boot_time()
-	data['cpu']['name'] = get_cpu_info()['brand_raw']
-	data['cpu']['cores'] = psutil.cpu_count(0)
-	data['cpu']['threads'] = psutil.cpu_count(1)
+  global data
+  try:
+    info = platform.freedesktop_os_release()
+    data['system']['name'] = info['NAME']
+    data['system']['id'] = info['ID']
+    data['system']['pretty_name'] = info['PRETTY_NAME']
+    data['system']['version'] = info['VERSION']
+    data['system']['version_id'] = info['VERSION_ID']
+    data['system']['logo'] = info['LOGO']
+  except AttributeError:
+    pass
+  data['name'] = platform.node()
+  data['system']['boot_time'] = psutil.boot_time()
+  data['cpu']['name'] = get_cpu_info()['brand_raw']
+  data['cpu']['cores'] = psutil.cpu_count(0)
+  data['cpu']['threads'] = psutil.cpu_count(1)
 
 def formatLoad(load):
   percent = 0
@@ -364,17 +364,17 @@ def createMetric(type, name, description, value):
   return "# HELP rabbit_%s %s\n# TYPE rabbit_%s %s\nrabbit_%s %s\n" % (name, description, name, type, name, value)
 
 def start():
-	parser = argparse.ArgumentParser()
-	parser.add_argument("--host", help="bind the server to specific host (default: 0.0.0.0)", type=str, default='0.0.0.0')
-	parser.add_argument("--port", help="bind the server to specific port (default: 8088)", type=int, default=8088)
-	parser.add_argument("--refresh", help="data will be fetched every x seconds (default: 5)", type=int, default=5)
-	parser.add_argument("--debug", help="enable debug mode (default: False)", action='store_true', default=False)
-	args = parser.parse_args()
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--host", help="bind the server to specific host (default: 0.0.0.0)", type=str, default='0.0.0.0')
+  parser.add_argument("--port", help="bind the server to specific port (default: 8088)", type=int, default=8088)
+  parser.add_argument("--refresh", help="data will be fetched every x seconds (default: 5)", type=int, default=5)
+  parser.add_argument("--debug", help="enable debug mode (default: False)", action='store_true', default=False)
+  args = parser.parse_args()
 
-	global refresh
-	refresh = args.refresh
+  global refresh
+  refresh = args.refresh
 
-	Thread(target=startDataFetcher).start()
-	Thread(target=startSlowDataFetcher).start()
+  Thread(target=startDataFetcher).start()
+  Thread(target=startSlowDataFetcher).start()
 
-	app.run(args.host, args.port, args.debug)
+  app.run(args.host, args.port, args.debug)
