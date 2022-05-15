@@ -39,7 +39,7 @@ After=network.target
 
 [Service]
 Type=simple
-User= #Enter your user from which you have installed pip packages
+User=root #Enter your user from which you have installed pip packages
 ExecStart=python3 -m rabbitmonitor
 TimeoutStartSec=0
 RemainAfterExit=yes
