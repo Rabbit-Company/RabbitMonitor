@@ -26,7 +26,7 @@ pip install argparse psutil py-cpuinfo quart
 # Install Rabbit Monitor
 pip install rabbitmonitor
 # Start monitoring with
-python -m rabbitmonitor
+python3 -m rabbitmonitor
 ```
 
 # Daemonizing (using systemd)
@@ -40,7 +40,7 @@ After=network.target
 [Service]
 Type=simple
 User= #Enter your user from which you have installed pip packages
-ExecStart=python -m rabbitmonitor
+ExecStart=python3 -m rabbitmonitor
 TimeoutStartSec=0
 RemainAfterExit=yes
 
