@@ -34,14 +34,18 @@ Running Rabbit Monitor in the background is a simple task, just make sure that i
 
 ```service
 [Unit]
-Description = Starting Rabbit Monitor
-After = network.target
+Description=Rabbit Monitor 
+After=network.target
 
 [Service]
-ExecStart = python -m rabbitmonitor
+Type=simple
+User= #Enter your user from which you have installed pip packages
+ExecStart=python -m rabbitmonitor
+TimeoutStartSec=0
+RemainAfterExit=yes
 
 [Install]
-WantedBy = multi-user.target
+WantedBy=multi-user.target
 ```
 Then, run the commands below to reload systemd and start Rabbit Monitor.
 ```yml
