@@ -1,4 +1,3 @@
-from email import parser
 from quart import Quart, websocket
 from cpuinfo import get_cpu_info
 import psutil
