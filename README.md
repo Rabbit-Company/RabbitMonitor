@@ -53,3 +53,8 @@ Then, run the commands below to reload systemd and start Rabbit Monitor.
 ```yml
 systemctl enable --now rabbitmonitor
 ```
+
+# Grafana Dashboard
+Rabbit Monitor has a pre-made Grafana dashboard that looks like this:
+![Grafana Dashboard](https://user-images.githubusercontent.com/44822563/168747801-a4cfb30d-f214-4eff-9097-9530802761b6.png)
+It can be installed from official Grafana website: https://grafana.com/grafana/dashboards/16275
