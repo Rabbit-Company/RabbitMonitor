@@ -1,28 +1,19 @@
 # Rabbit Monitor
 
-Rabbit Monitor is a simple program that fetch your computer data every 5 seconds (By default) and create API endpoints for other programs to collect it.
+Rabbit Monitor is a simple program that fetches your computer data every 5 seconds (By default) and create /metrics API endpoint for other programs to collect data from it.
 
 Required packages:
-- argparse
-- psutil
-- py-cpuinfo
 - quart
+- psutil
+- argparse
 
 API Endpoints:
-- /cpu
-- /memory
-- /swap
-- /storage
-- /network
-- /sensors
-- /system
-- /stats
 - /metrics (Support Prometheus)
 
 # Installation (Python and PIP required)
 ```yml
 # Install Python modules
-pip install argparse psutil py-cpuinfo quart
+pip install quart psutil argparse
 # Install Rabbit Monitor
 pip install rabbitmonitor
 # Start monitoring with
@@ -42,7 +33,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-ExecStart=python3 -m rabbitmonitor --onlymetrics
+ExecStart=python3 -m rabbitmonitor
 TimeoutStartSec=0
 RemainAfterExit=yes
 
