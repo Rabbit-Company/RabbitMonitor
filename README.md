@@ -35,6 +35,7 @@ Type=simple
 User=root
 ExecStart=python3 -m rabbitmonitor
 TimeoutStartSec=0
+TimeoutStopSec=2
 RemainAfterExit=yes
 
 [Install]
