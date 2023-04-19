@@ -1,5 +1,7 @@
 # Rabbit Monitor
 
+> ⚠️ Please note that Rabbit Monitor is now deprecated and has been replaced by [Rabbit Monitor 2](https://github.com/Rabbit-Company/RabbitMonitor2). The new version has been completely rewritten in Rust for improved performance and scalability compared to the previous Python-based implementation.
+
 Rabbit Monitor is a simple program that fetches your computer data every 5 seconds (By default) and create /metrics API endpoint for other programs to collect data from it.
 
 Required packages:
